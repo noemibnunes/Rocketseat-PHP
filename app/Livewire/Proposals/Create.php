@@ -8,6 +8,7 @@ use App\Models\Proposal;
 use Livewire\Attributes\Rule;
 use App\Actions\ArrangePositions;
 use Livewire\Attributes\Validate;
+use App\Notifications\NewProposal;
 use Illuminate\Support\Facades\DB;
 use App\Livewire\Projects\Proposals;
 
@@ -34,13 +35,16 @@ class Create extends Component
             return;
         }
 
-        $proposal = $this->project->proposals()
-            ->updateOrCreate(
-                ['email' => $this->email],
-                ['hours' => $this->hours]
-            );
-        
-        $this->arrangePositions($proposal);
+        DB::transaction(function () {
+            $proposal = $this->project->proposals()
+                ->updateOrCreate(
+                    ['email' => $this->email],
+                    ['hours' => $this->hours]
+                );
+            $this->arrangePositions($proposal);
+        });
+
+        $this->project->author->notify(new NewProposal($this->project));
 
         $this->dispatch('proposal::created');
 

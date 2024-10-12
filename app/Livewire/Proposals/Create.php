@@ -9,7 +9,7 @@ use Livewire\Attributes\Validate;
 
 class Create extends Component
 {
-    public bool $modal = true;
+    public bool $modal = false;
 
     public Project $project;
     #[Validate(['required', 'email'])]
